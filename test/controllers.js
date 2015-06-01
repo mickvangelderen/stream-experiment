@@ -19,11 +19,12 @@ export class FileReadController {
 		})
 	}
 
-	pull() {
+	process() {
 		return new Promise((resolve, reject) => {
 			let buffer = Buffer(this.chunkSize)
 			fs.read(this.fd, buffer, 0, this.chunkSize, null, (err, bytesRead) => {
 				if (err) return reject(err)
+				// if (Math.random() < 0.2) return reject(new Error('random failure'))
 				resolve(bytesRead ? buffer.slice(0, bytesRead) : undefined)
 			})
 		})
@@ -39,6 +40,8 @@ export class FileReadController {
 		})
 	}
 }
+
+FileReadController.prototype.generator = true
 
 export class FileWriteController {
 	constructor({ path, flags = 'w', mode = 0o666 } = {}) {
@@ -58,12 +61,14 @@ export class FileWriteController {
 		})
 	}
 
-	push(chunk) {
+	process(chunk) {
 		return new Promise((resolve, reject) => {
-			fs.write(this.fd, chunk, 0, chunk.length, null, (err, bytesWritten) => {
-				if (err) return reject(err)
-				resolve()
-			})
+			setTimeout(() => {
+				fs.write(this.fd, chunk, 0, chunk.length, null, (err, bytesWritten) => {
+					if (err) return reject(err)
+					resolve(chunk)
+				})
+			}, 50)
 		})
 	}
 
